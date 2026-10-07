@@ -2,9 +2,9 @@
    Creates a Stripe Checkout page for one piece plus a flat delivery fee.
    Stripe collects the customer's email, phone, shipping address and payment.
 
-   Prices, delivery fees and countries are read from this site's own copy of
-   shop.html (bundled with the function, see vercel.json), so shop.html stays
-   the only place to edit them, and visitors can't change them in the browser.
+   Prices and colours are read from this site's own copy of shop.html, and delivery
+   regions and fees from delivery.html (both bundled with the function, see vercel.json),
+   so those files stay the only place to edit them, and visitors can't change them in the browser.
 
    Needs the STRIPE_SECRET_KEY environment variable in Vercel. */
 const fs = require("fs");
@@ -40,9 +40,11 @@ const text = (html) => html
   .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&")
   .replace(/\s+/g, " ").trim();
 
+// Reads one of the site's pages, without the instructions in its comments.
+const readPage = (file) => fs.readFileSync(path.join(__dirname, "..", file), "utf8").replace(/<!--[\s\S]*?-->/g, "");
+
 function readShop() {
-  const html = fs.readFileSync(path.join(__dirname, "..", "shop.html"), "utf8")
-    .replace(/<!--[\s\S]*?-->/g, ""); // ignore the instructions in comments
+  const html = readPage("shop.html");
 
   const shopTag = html.match(/<section[^>]*class="shop"[^>]*>/);
   const settings = attrs(shopTag ? shopTag[0] : "");
@@ -50,10 +52,12 @@ function readShop() {
   // Each piece runs to its </article>, or (if that was forgotten) to the next piece or the end of the shop.
   const items = [...html.matchAll(/<article([^>]*class="item"[^>]*)>([\s\S]*?)(?=<\/article>|<article|<\/section>|$)/g)].map(([, a, body]) => {
     const at = attrs(a);
-    const name = body.match(/<h[1-4][^>]*>([\s\S]*?)<\/h[1-6]>/);  // the piece's heading, whatever its level
+    // The piece's name: the element with class="name", or else its heading (whatever its level).
+    const name = body.match(/<(\w+)[^>]*class="[^"]*\bname\b[^"]*"[^>]*>([\s\S]*?)<\/\1>/)
+      || body.match(/<(h[1-4])[^>]*>([\s\S]*?)<\/h[1-6]>/);
     const img = body.match(/<img[^>]*src="([^"]+)"/);
     return {
-      name: name ? text(name[1]) : "",
+      name: name ? text(name[2]) : "",
       price: Number(at["data-price"]),
       sold: "data-sold" in at,
       image: img && img[1],
@@ -61,7 +65,11 @@ function readShop() {
     };
   });
 
-  const select = html.match(/<select[^>]*id="destination"[^>]*>([\s\S]*?)<\/select>/);
+  // Delivery regions live in delivery.html (older versions kept them in shop.html).
+  let deliveryHtml = "";
+  try { deliveryHtml = readPage("delivery.html"); } catch (err) { console.error("Could not read delivery.html", err); }
+  const select = deliveryHtml.match(/<select[^>]*id="destination"[^>]*>([\s\S]*?)<\/select>/)
+    || html.match(/<select[^>]*id="destination"[^>]*>([\s\S]*?)<\/select>/);
   const destinations = select
     ? [...select[1].matchAll(/<option([^>]*)>([\s\S]*?)<\/option>/g)].map(([, a, label]) => {
         const at = attrs(a);

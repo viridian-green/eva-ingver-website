@@ -5,7 +5,8 @@ The site is five pages and one style file. Open any of them in a text editor
 
 ```
 index.html      Home page (intro text + pictures)
-shop.html       Shop page: pieces for sale, prices, colours, delivery fees
+shop.html       Shop page: pieces for sale, prices, colours
+delivery.html   Delivery regions and fees
 piece.html      One piece's own page (made from shop.html, nothing to edit)
 contact.html    Contact page
 thanks.html     Page shown after someone pays
@@ -29,7 +30,7 @@ Portrait photos (taller than wide) fit best. Keep photos under about 1 MB. Expor
 
 ## Add a piece to the shop
 In `shop.html`, copy one block from `<article class="item" ...>` to `</article>`, paste it, and change
-the picture, name (the heading), description and `data-price="28"` (number only). The price appears by itself.
+the picture, name (the line with `class="name"`), description and `data-price="28"` (number only). The price appears by itself.
 Each piece needs a different name, and remember the closing `</article>`.
 Sold? Replace `data-price="28"` with `data-sold`. The piece will show "Sold" and no Buy button.
 
@@ -41,12 +42,17 @@ separated by commas). The buyer picks one on the piece's page, and the order in 
 e.g. "LED eyelash — Blue". The heading above the colour buttons is `data-color-label` on the shop settings line.
 
 ## Delivery fees
-In `shop.html`, under "DELIVERY", each `<option ...>` line is one region with one flat fee:
+Delivery regions and fees are in their own file, `delivery.html`. Each `<option ...>` line is one region with one flat fee:
 - `data-fee="12"`: the fee
 - `data-countries="FR BE"`: two-letter country codes ([list](https://www.iban.com/country-codes)), or `*` for "every other country"
 - the words between the tags: the region's name
 
-When paying, customers can only enter an address in the region they picked.
+Each piece's page shows this picker above the Buy button. When paying, customers can only enter an address in the region they picked.
+
+## Share button
+Under the Buy button, each piece's page has a share icon. On phones and Macs it opens the share menu
+(Messages, AirDrop, WhatsApp…); elsewhere it copies the link. Its text is `data-share-label` on the
+shop settings line in `shop.html` (leave it empty to show only the icon).
 
 ## Payments
 Payments go through Stripe. The buyer enters their email, phone, delivery address and card on

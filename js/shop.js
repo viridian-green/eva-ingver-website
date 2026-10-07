@@ -4,7 +4,7 @@
      button, then sends the customer to Stripe to pay.
    Everything you edit (pieces, prices, colours, delivery fees, labels) is in shop.html, not here. */
 (() => {
-  const NAME = "h1, h2, h3, h4";  // a piece's name is its heading
+  const NAME = ".name, h1, h2, h3, h4";  // a piece's name: the line with class="name", or its heading
   const nameOf = (item) => {
     const heading = item.querySelector(NAME);
     return heading ? heading.textContent.replace(/\s+/g, " ").trim() : "";
@@ -14,7 +14,7 @@
   const pieceUrl = (name) => `piece.html?item=${encodeURIComponent(name)}`;
   // Dot colours for the colour switch: the same bright LED colours as the birds' lights.
   // Any other colour name (e.g. "Red") uses the browser's colour of that name.
-  const SWATCHES = { green: "#2bff6b", blue: "#2b9bff", purple: "#8f4bff" };
+  const SWATCHES = { green: "#2bff6b", blue: "#2b9bff", purple: "#b74bff" };
 
   const formatter = (currency) => (n) => new Intl.NumberFormat(document.documentElement.lang || "en", {
     style: "currency", currency, minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
@@ -55,13 +55,54 @@
   const piece = document.querySelector("[data-piece]");
   if (piece) showPiece(piece);
 
+  // Apple-style share button: opens the phone's or computer's share menu (Messages, AirDrop,
+  // WhatsApp, Mail…). Where there is no share menu, it copies the link instead.
+  const SHARE_ICON = `<svg class="share__icon" viewBox="0 0 24 24" width="16" height="16" fill="none"
+    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M8.5 9H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1.5"/>
+    <path d="M12 3v12"/><path d="M8.5 6.5 12 3l3.5 3.5"/></svg>`;
+
+  function shareButton(name, source) {
+    const label = source.dataset.shareLabel || "";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "share";
+    button.innerHTML = SHARE_ICON;
+    const text = document.createElement("span");
+    text.textContent = label;
+    button.append(text);
+    button.setAttribute("aria-label", label || "Share");
+
+    button.addEventListener("click", async () => {
+      const data = { title: document.title, text: name, url: location.href };
+      if (navigator.share) {
+        try {
+          await navigator.share(data);
+          return;
+        } catch (err) {
+          if (err.name === "AbortError") return;  // the visitor closed the share menu
+        }
+      }
+      try {
+        await navigator.clipboard.writeText(location.href);
+        text.textContent = source.dataset.copiedLabel || label;
+        setTimeout(() => { text.textContent = label; }, 2000);
+      } catch (err) {
+        console.error("Could not share or copy the link", err);
+      }
+    });
+    return button;
+  }
+
   async function showPiece(container) {
     const wanted = (new URLSearchParams(location.search).get("item") || "").replace(/\s+/g, " ").trim();
-    let source, item;
+    let source, item, deliveryPage;
     try {
-      const html = await (await fetch("shop.html")).text();
-      source = new DOMParser().parseFromString(html, "text/html").querySelector(".shop");
+      const load = async (url) => new DOMParser().parseFromString(await (await fetch(url)).text(), "text/html");
+      const [shopPage, delivery] = await Promise.all([load("shop.html"), load("delivery.html").catch(() => null)]);
+      source = shopPage.querySelector(".shop");
       item = source && [...source.querySelectorAll(".item")].find((i) => nameOf(i) === wanted);
+      deliveryPage = delivery;
     } catch (err) {
       console.error(err);
     }
@@ -91,7 +132,10 @@
     }
     container.append(details);
 
-    if (!isForSale(item)) return;
+    if (!isForSale(item)) {
+      details.append(shareButton(name, source));
+      return;
+    }
 
     // Colour choice, in the same style as the birds' Lights switch.
     const colors = colorsOf(item);
@@ -121,8 +165,8 @@
       details.append(box);
     }
 
-    // Delivery picker (from shop.html), with each region's fee shown next to its name.
-    const select = source.querySelector("#destination");
+    // Delivery picker (from delivery.html), with each region's fee shown next to its name.
+    const select = (deliveryPage && deliveryPage.querySelector("#destination")) || source.querySelector("#destination");
     if (select) {
       const delivery = select.closest(".delivery").cloneNode(true);
       const picker = delivery.querySelector("select");
@@ -138,7 +182,7 @@
       });
       details.append(delivery);
     } else {
-      console.error('shop.html has no <select id="destination">: add the DELIVERY block back so customers can pay.');
+      console.error('delivery.html has no <select id="destination">: customers can\'t pay until the delivery regions are back.');
     }
 
     const button = document.createElement("button");
@@ -150,7 +194,7 @@
     error.setAttribute("role", "alert");
     error.textContent = source.dataset.errorLabel || "";
     error.hidden = true;
-    details.append(button, error);
+    details.append(button, error, shareButton(name, source));
 
     button.addEventListener("click", async () => {
       button.disabled = true;
