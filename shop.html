@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop — Studio Name</title>
+  <meta name="description" content="Pieces available from Studio Name.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <a href="index.html" class="site-name">Studio Name</a>
+    <nav>
+      <a href="index.html">Work</a>
+      <a href="shop.html" aria-current="page">Shop</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro">
+      <h1>Shop</h1>
+      <p>Pieces currently available. Each one is made by hand, so every piece is a little different.</p>
+    </section>
+
+    <!-- ===== SHOP SETTINGS (on the line below) =====
+         data-currency   EUR, USD, GBP...
+         data-buy-label  text on the buy buttons
+         data-sold-label text shown instead of the price when a piece is sold
+         data-error-label message if something goes wrong when paying -->
+    <section class="shop" data-currency="EUR" data-buy-label="Buy" data-sold-label="Sold"
+             data-error-label="Something went wrong. Please try again, or write to us.">
+
+      <!-- ===== DELIVERY =====
+           One flat fee per order, depending on where it is delivered.
+           data-fee        the fee, number only (e.g. 12 or 12.50)
+           data-countries  two-letter country codes separated by spaces,
+                           or * for every country not listed in the other lines
+           At checkout, customers can only enter an address in the region they picked.
+           To add a region, copy an <option ...>...</option> line and change it. -->
+      <div class="delivery">
+        <label for="destination">Delivering to</label>
+        <select id="destination">
+          <option value="france" data-fee="6" data-countries="FR">France</option>
+          <option value="europe" data-fee="12" data-countries="AT BE BG HR CY CZ DK EE FI DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE GB CH NO IS LI MC AD SM">Europe</option>
+          <option value="world" data-fee="25" data-countries="*">Rest of the world</option>
+        </select>
+      </div>
+
+      <!-- ===== PIECES =====
+           To add a piece:
+           1. Put the photo in the "images" folder.
+           2. Copy one article block (from <article to </article>) and paste it below the others.
+           3. Change the picture file name, the name, the description and data-price (number only).
+           The price and Buy button appear automatically.
+           To mark a piece as sold, replace data-price="..." with data-sold
+           Each piece needs a different name. -->
+      <div class="grid">
+        <article class="item" data-price="28">
+          <img src="images/shop-1.jpg" alt="Stoneware mug with speckled glaze" loading="lazy">
+          <h3>Stoneware mug</h3>
+          <p>Wheel-thrown, speckled glaze. Holds 350 ml.</p>
+        </article>
+        <article class="item" data-price="18">
+          <img src="images/shop-2.jpg" alt="Linen tea towel" loading="lazy">
+          <h3>Linen tea towel</h3>
+          <p>Stonewashed linen, softens with every wash.</p>
+        </article>
+        <article class="item" data-sold>
+          <img src="images/shop-3.jpg" alt="Handbound notebook" loading="lazy">
+          <h3>Handbound notebook</h3>
+          <p>A5, 120 pages of recycled paper.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 Studio Name</p>
+  </footer>
+
+</div>
+<script src="js/shop.js"></script>
+<script src="js/birds.js"></script>
+</body>
+</html>
