@@ -5,7 +5,7 @@
 :root {
   --bg: #ffffff;
   --text: #1a1a1a;
-  --muted: #6b6b6b;          /* captions, prices, small text */
+  --muted: #ff00ff;          /* captions, prices, small text */
   --line: #e6e6e6;           /* thin dividers */
   --font: Arial, sans-serif;
   --size: 11px;              /* base text size */
@@ -35,7 +35,7 @@ img { display: block; max-width: 100%; }
 
 header {
   display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 12px;
-  padding: 32px 0 0;
+  padding: 96px 0 0;              /* room above the line for the resting birds */
   border-bottom: 1px solid #000;
   margin-bottom: 1cm;
 }
@@ -83,16 +83,64 @@ select {
 .buy:disabled { color: var(--muted); cursor: default; }
 .shop-error { color: var(--text); font-size: .875rem; margin: -24px 0 40px; }
 
+/* Shop grid: each piece opens its own page */
+.item--link { cursor: pointer; }
+.item--link h2 a, .item--link h3 a { text-decoration: none; }
+.item--link:hover h2 a, .item--link:hover h3 a { text-decoration: underline; }
+.shop > .delivery { display: none; }   /* shown on each piece's page instead */
+
+/* A single piece (piece.html) */
+.piece { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+.piece > img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; background: #f4f4f4; }
+.piece-details { max-width: 420px; }
+.piece-details .price { margin: 0 0 16px; }
+.piece-details .delivery { margin: 24px 0 16px; }
+.piece-details .shop-error { margin: 12px 0 0; }
+.piece-missing { color: var(--muted); }
+
+/* The colour switch on a piece's page: same look as the Lights switch, but in the page */
+.led-switch.led-switch--inline {
+  position: static; transform: none; z-index: auto;
+  display: inline-flex; flex-direction: row; flex-wrap: wrap; align-items: center;
+  margin-top: 24px;
+}
+.led-switch--inline .led-switch__label { padding: 0 6px 0 2px; }
+.led-switch__swatch {
+  display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%;
+  background: var(--swatch); vertical-align: middle;
+  box-shadow: 0 0 6px var(--swatch);
+}
+
 /* Contact page */
 .contact { max-width: 560px; }
 .contact dl { margin: 32px 0 0; }
 .contact dt { color: var(--muted); font-size: .875rem; }
 .contact dd { margin: 0 0 20px; }
 
+@media (max-width: 700px) {
+  .piece { grid-template-columns: 1fr; gap: 24px; }
+}
+
 @media (max-width: 600px) {
-  header { padding: 24px 0 32px; }
+  header { padding: 96px 0 32px; }
   nav { gap: 16px; }
 }
 
-/* Birds that follow the mouse (js/birds.js) */
-.birds { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
+/* Birds that follow the mouse (js/birds.js). They float above the page and never block clicks. */
+.birds-canvas { position: fixed; inset: 0; z-index: 1000; pointer-events: none; display: block; }
+
+/* The small on / off / blink control for the birds' lights, on the right edge of the page. */
+.led-switch {
+  position: fixed; right: 16px; top: 50%; transform: translateY(-50%); z-index: 1001;
+  display: flex; flex-direction: column; gap: 4px; padding: 8px;
+  background: #fff; border: 1px solid #000;
+  font: 400 11px/1 Arial, Helvetica, sans-serif;
+}
+.led-switch__label { padding: 2px 0 4px; text-align: center; text-transform: uppercase; letter-spacing: 0.08em; }
+.led-switch button {
+  padding: 5px 10px; border: 1px solid #000; background: #fff; color: #000;
+  font: inherit; cursor: pointer;
+}
+.led-switch button:hover { background: #f2f2f2; }
+.led-switch button[aria-pressed="true"] { background: #000; color: #fff; }
+.led-switch button:focus-visible { outline: 2px solid #000; outline-offset: 2px; }

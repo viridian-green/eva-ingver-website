@@ -47,11 +47,18 @@ function readShop() {
   const shopTag = html.match(/<section[^>]*class="shop"[^>]*>/);
   const settings = attrs(shopTag ? shopTag[0] : "");
 
-  const items = [...html.matchAll(/<article([^>]*class="item"[^>]*)>([\s\S]*?)<\/article>/g)].map(([, a, body]) => {
+  // Each piece runs to its </article>, or (if that was forgotten) to the next piece or the end of the shop.
+  const items = [...html.matchAll(/<article([^>]*class="item"[^>]*)>([\s\S]*?)(?=<\/article>|<article|<\/section>|$)/g)].map(([, a, body]) => {
     const at = attrs(a);
-    const name = body.match(/<h3[^>]*>([\s\S]*?)<\/h3>/);
+    const name = body.match(/<h[1-4][^>]*>([\s\S]*?)<\/h[1-6]>/);  // the piece's heading, whatever its level
     const img = body.match(/<img[^>]*src="([^"]+)"/);
-    return { name: name ? text(name[1]) : "", price: Number(at["data-price"]), sold: "data-sold" in at, image: img && img[1] };
+    return {
+      name: name ? text(name[1]) : "",
+      price: Number(at["data-price"]),
+      sold: "data-sold" in at,
+      image: img && img[1],
+      colors: (at["data-colors"] || "").split(",").map((c) => c.trim()).filter(Boolean),
+    };
   });
 
   const select = html.match(/<select[^>]*id="destination"[^>]*>([\s\S]*?)<\/select>/);
@@ -96,6 +103,14 @@ module.exports = async (req, res) => {
     const item = shop.items.find((i) => i.name === wanted);
     if (!item || item.sold || !(item.price > 0)) return res.status(400).json({ error: "This piece is not available" });
 
+    // Pieces with colour options need one of their own colours.
+    let color = null;
+    if (item.colors.length) {
+      color = item.colors.find((c) => c === body.color);
+      if (!color) return res.status(400).json({ error: "Please choose a colour" });
+    }
+    const title = color ? `${item.name} — ${color}` : item.name;
+
     const dest = shop.destinations.find((d) => d.value === body.destination);
     if (!dest || !(dest.fee >= 0)) return res.status(400).json({ error: "Unknown delivery region" });
 
@@ -119,7 +134,7 @@ module.exports = async (req, res) => {
         price_data: {
           currency,
           unit_amount: minor(item.price),
-          product_data: { name: item.name, images: item.image ? [new URL(item.image, `${origin}/`).href] : null },
+          product_data: { name: title, images: item.image ? [new URL(item.image, `${origin}/`).href] : null },
         },
       }],
       shipping_address_collection: { allowed_countries: countries },
@@ -131,6 +146,9 @@ module.exports = async (req, res) => {
         },
       }],
       phone_number_collection: { enabled: true },
+      // Shown on the payment in the Stripe Dashboard, so you know exactly what to send.
+      payment_intent_data: { description: title, metadata: { piece: item.name, color } },
+      metadata: { piece: item.name, color },
     };
 
     const stripe = await fetch("https://api.stripe.com/v1/checkout/sessions", {

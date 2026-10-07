@@ -1,11 +1,12 @@
 # How to edit the website
 
-The site is four pages and one style file. Open any of them in a text editor
+The site is five pages and one style file. Open any of them in a text editor
 (TextEdit in "plain text" mode, or a free editor like VS Code), make a change, and save.
 
 ```
 index.html      Home page (intro text + pictures)
-shop.html       Shop page: pieces for sale, prices, delivery fees
+shop.html       Shop page: pieces for sale, prices, colours, delivery fees
+piece.html      One piece's own page (made from shop.html, nothing to edit)
 contact.html    Contact page
 thanks.html     Page shown after someone pays
 styles.css      Colours, font and spacing for every page
@@ -28,9 +29,16 @@ Portrait photos (taller than wide) fit best. Keep photos under about 1 MB. Expor
 
 ## Add a piece to the shop
 In `shop.html`, copy one block from `<article class="item" ...>` to `</article>`, paste it, and change
-the picture, name, description and `data-price="28"` (number only). The price and **Buy** button
-appear by themselves. Each piece needs a different name.
+the picture, name (the heading), description and `data-price="28"` (number only). The price appears by itself.
+Each piece needs a different name, and remember the closing `</article>`.
 Sold? Replace `data-price="28"` with `data-sold`. The piece will show "Sold" and no Buy button.
+
+Clicking a piece in the shop opens its own page (`piece.html`) with the big picture, description,
+colour choice, delivery and the **Buy** button. That page is made from the same block, so there's nothing extra to edit.
+
+**Colour choice:** add `data-colors="Green, Blue, Purple"` to a piece's `<article ...>` line (any names,
+separated by commas). The buyer picks one on the piece's page, and the order in Stripe shows it,
+e.g. "LED eyelash — Blue". The heading above the colour buttons is `data-color-label` on the shop settings line.
 
 ## Delivery fees
 In `shop.html`, under "DELIVERY", each `<option ...>` line is one region with one flat fee:
@@ -47,16 +55,20 @@ Turn on email notifications in Stripe so you hear about every sale.
 
 ## Things that appear on every page
 The studio name, menu and footer are repeated at the top and bottom of each page
-(index, shop, contact, thanks). If you change them, change them in all four files.
+(index, shop, piece, contact, thanks). If you change them, change them in all five files.
 
 ## Change colours or font
 Edit the values at the top of `styles.css`:
 `--bg` (background), `--text` (text colour), `--font`, `--size`.
 
 ## The birds
-Change their size and speed at the top of `js/birds.js`. To change the pictures, replace the files in
-`images/birds/` (keep them small: about 200 px). To remove the birds, delete the line
-`<script src="js/birds.js"></script>` near the bottom of each page.
+The birds follow the mouse, circle it when it stays still, scatter on a click, and after 15 seconds
+fly up to rest on the black line under the header. All their settings (size, speed, rest time,
+light colours, the Lights switch) are in `birdConfig` at the top of `js/birds.js`.
+Pictures are in `images/birds/`: each `birdN.png` has a `birdN-mask.png` (the bird's shape, used
+for the light outline and for standing on the line). Keep them small, about 320 px.
+The header's top padding in `styles.css` leaves room above the line for the birds. Keep it if you change the header.
+To remove the birds, delete the line `<script src="js/birds.js"></script>` near the bottom of each page.
 
 ## Preview
 Double-click `index.html` to open it in your browser. Refresh after saving a change.

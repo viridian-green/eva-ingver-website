@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop — Eva Ingver</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <a href="index.html" class="site-name">Eva Ingver</a>
+    <nav>
+      <a href="index.html">Work</a>
+      <a href="shop.html" aria-current="page">Shop</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ===== ONE PIECE =====
+         This page shows a single piece from the shop. Its picture, name, price, description
+         and colours are taken from that piece's block in shop.html, so edit them there. -->
+    <section class="piece" data-piece></section>
+
+    <!-- Shown if the piece can't be found (for example after it was renamed or removed). -->
+    <p class="piece-missing" data-piece-missing hidden>This piece isn't available any more. <a href="shop.html">See the shop</a></p>
+  </main>
+
+  <footer>
+    <p>© 2026 Eva Ingver</p>
+  </footer>
+
+</div>
+<script src="js/shop.js"></script>
+<script src="js/birds.js"></script>
+</body>
+</html>

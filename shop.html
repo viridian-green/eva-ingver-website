@@ -28,9 +28,11 @@
          data-currency   EUR, USD, GBP...
          data-buy-label  text on the buy buttons
          data-sold-label text shown instead of the price when a piece is sold
-         data-error-label message if something goes wrong when paying -->
+         data-error-label message if something goes wrong when paying
+         data-color-label heading of the colour switch on a piece's page -->
     <section class="shop" data-currency="EUR" data-buy-label="Buy" data-sold-label="Sold"
-             data-error-label="Something went wrong. Please try again, or write to us.">
+             data-error-label="Something went wrong. Please try again, or write to us."
+             data-color-label="LED colour">
 
       <!-- ===== DELIVERY =====
            One flat fee per order, depending on where it is delivered.
@@ -38,31 +40,38 @@
            data-countries  two-letter country codes separated by spaces,
                            or * for every country not listed in the other lines
            At checkout, customers can only enter an address in the region they picked.
-           To add a region, copy an <option ...>...</option> line and change it. -->
+           To add a region, copy an <option ...>...</option> line and change it.
+           This picker is shown on each piece's own page, next to the Buy button. -->
+      <div class="delivery">
+        <label for="destination">Delivering to</label>
+        <select id="destination">
+          <option value="france" data-fee="6" data-countries="FR">France</option>
+          <option value="europe" data-fee="12" data-countries="AT BE BG HR CY CZ DK EE FI DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE GB CH NO IS LI MC AD SM">Europe</option>
+          <option value="world" data-fee="25" data-countries="*">Rest of the world</option>
+        </select>
+      </div>
 
       <!-- ===== PIECES =====
            To add a piece:
            1. Put the photo in the "images" folder.
            2. Copy one article block (from <article to </article>) and paste it below the others.
            3. Change the picture file name, the name, the description and data-price (number only).
-           The price and Buy button appear automatically.
+           The price appears automatically. Clicking a piece opens its own page
+           (picture, description, Buy button), made from this block.
+           Colour choice (optional): add data-colors="Green, Blue, Purple" to the <article ...> line.
+           The buyer picks one on the piece's page and it's shown on the order in Stripe.
            To mark a piece as sold, replace data-price="..." with data-sold
            Each piece needs a different name. -->
       <div class="grid">
-        <article class="item" data-price="28">
+        <article class="item" data-price="28" data-colors="Green, Blue, Purple">
           <img src="images/shop-1.jpg" alt="Stoneware mug with speckled glaze" loading="lazy">
-          <h3>Stoneware mug</h3>
+          <h2>LED eyelash</h2>
           <p>Wheel-thrown, speckled glaze. Holds 350 ml.</p>
         </article>
         <article class="item" data-price="18">
           <img src="images/shop-2.jpg" alt="Linen tea towel" loading="lazy">
           <h3>Linen tea towel</h3>
           <p>Stonewashed linen, softens with every wash.</p>
-        </article>
-        <article class="item" data-sold>
-          <img src="images/shop-3.jpg" alt="Handbound notebook" loading="lazy">
-          <h3>Handbound notebook</h3>
-          <p>A5, 120 pages of recycled paper.</p>
         </article>
       </div>
     </section>
