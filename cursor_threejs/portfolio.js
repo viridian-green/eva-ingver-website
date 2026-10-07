@@ -4,17 +4,9 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let birds = [];
-const birdConfig = {
-    numBirds: 6,
-    maxDistance: 600,
-    desiredSeparation: 90,
-    maxSpeed: 0.55,
-    maxForce: 0.003,
-    seekWeight: 0.8,
-    separationWeight: 0.9,
-    drag: 0.985,
-    maxRotationSpeed: 0.006,
-};
+const numBirds = 6;
+const maxDistance = 600;
+const desiredSeparation = 90; // Desired separation distance
 
 const imagePaths = ['bird1.png', 'bird2.png', 'bird3.png', 'bird4.png', 'bird6.png'];
 
@@ -32,17 +24,14 @@ function loadImages() {
 class Bird {
     constructor(x, y, image) {
         this.position = { x: x, y: y };
-        this.velocity = {
-            x: (Math.random() * 2 - 1) * birdConfig.maxSpeed,
-            y: (Math.random() * 2 - 1) * birdConfig.maxSpeed,
-        };
+        this.velocity = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
         this.acceleration = { x: 0, y: 0 };
         this.size = 75;
         this.image = image;
-        this.maxForce = birdConfig.maxForce;
-        this.maxSpeed = birdConfig.maxSpeed;
+        this.maxForce = 0.005;
+        this.maxSpeed = 0.9;
         this.angle = 0;
-        this.maxRotationSpeed = birdConfig.maxRotationSpeed;
+        this.maxRotationSpeed = 0.009; // Adjust this value to change rotation speed
     }
 
     applyForce(force) {
@@ -107,20 +96,17 @@ class Bird {
     update(target, isLeader, birds) {
         let seekForce = this.seek(isLeader ? target : target.position);
         let separateForce = this.separate(birds);
-
-        seekForce.x *= birdConfig.seekWeight;
-        seekForce.y *= birdConfig.seekWeight;
-        separateForce.x *= birdConfig.separationWeight;
-        separateForce.y *= birdConfig.separationWeight;
+        
+        seekForce.x *= 1;
+        seekForce.y *= 1;
+        separateForce.x *= 1.5;
+        separateForce.y *= 1.5;
 
         this.applyForce(seekForce);
         this.applyForce(separateForce);
 
         this.velocity.x += this.acceleration.x;
         this.velocity.y += this.acceleration.y;
-        this.velocity.x *= birdConfig.drag;
-        this.velocity.y *= birdConfig.drag;
-
         let speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
         if (speed > this.maxSpeed) {
             this.velocity.x = (this.velocity.x / speed) * this.maxSpeed;
@@ -193,7 +179,7 @@ canvas.addEventListener('mousemove', (event) => {
 });
 
 loadImages().then(images => {
-    for (let i = 0; i < birdConfig.numBirds; i++) {
+    for (let i = 0; i < numBirds; i++) {
         birds.push(new Bird(Math.random() * canvas.width, Math.random() * canvas.height, images[i % images.length]));
     }
     animate(mousePos);
